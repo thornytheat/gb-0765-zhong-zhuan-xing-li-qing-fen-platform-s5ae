@@ -1,0 +1,4 @@
+<div class="panel-head"><h2>航段去向</h2><span class="{{ 'ok' if stages.ledger.balanced else 'bad' }}">{{ '件数已对平' if stages.ledger.balanced else '件数有差异' }}</span></div>
+<div class="table-scroll"><table><thead><tr><th>航段</th><th>目的站</th><th>清单</th><th>已装</th><th>待证</th><th>未装</th><th>错装件</th></tr></thead><tbody>
+{% for row in stages.ledger.rows %}<tr><td>{{ row.leg }}</td><td>{{ row.destination }}</td><td class="num">{{ row.manifest }}</td><td class="num">{{ row.loaded }}</td><td class="num">{{ row.pending }}</td><td class="num">{{ row.not_loaded }}</td><td class="num">{{ row.wrong_bags }}</td></tr>{% endfor %}</tbody></table></div>
+<div class="equation"><b>{{ ledger.manifest }}</b><span>清单件</span> = <b>{{ ledger.loaded }}</b><span>已装</span> + <b>{{ ledger.pending }}</b><span>待证</span> + <b>{{ ledger.not_loaded }}</b><span>未装</span></div>

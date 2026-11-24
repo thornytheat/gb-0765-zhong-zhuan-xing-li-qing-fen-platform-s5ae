@@ -1,0 +1,10 @@
+name: leg-luggage
+services:
+  app:
+    build: .
+    ports: ["18464:8000"]
+    environment:
+      LUGGAGE_DB: /archive/transfer.sqlite3
+    volumes: ["archive:/archive"]
+volumes:
+  archive:

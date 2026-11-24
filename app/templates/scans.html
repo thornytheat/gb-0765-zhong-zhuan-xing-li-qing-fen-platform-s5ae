@@ -1,0 +1,4 @@
+<div class="panel-head"><h2>扫描原件采信</h2><span>{{ stages.scans.counts.accepted }} 条采信 · {{ stages.scans.counts.rejected }} 条隔离</span></div>
+<div class="table-scroll"><table><thead><tr><th>原行</th><th>扫描号</th><th>行李牌</th><th>证据</th><th>原值</th></tr></thead><tbody>
+{% for row in stages.scans.isolated + stages.scans.repeats + stages.scans.rows %}<tr><td class="num">{{ row.line }}</td><td>{{ row.event or '—' }}</td><td>{{ row.tag or '—' }}</td><td>{{ row.reason or row.action }}</td><td><span class="clip" title="{{ row.raw|join(' / ') }}">{{ row.raw|join(' / ') }}</span></td></tr>{% endfor %}
+</tbody></table></div>

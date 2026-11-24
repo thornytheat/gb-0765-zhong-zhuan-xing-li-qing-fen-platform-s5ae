@@ -1,0 +1,8 @@
+:root {
+  --bg:#121722; --surface:#191f2d; --surface-2:#202737; --ink:#f4edf0; --ink-muted:#a4afc0;
+  --line:#303848; --line-strong:#475365; --accent:#fa778a; --accent-ink:#231115;
+  --ok:#7bd6a3; --warn:#f1c478; --bad:#ffabb3; --info:#a8b6cd;
+  --font-ui:"IBM Plex Mono","SFMono-Regular",Consolas,"PingFang SC",monospace;
+  --font-num:var(--font-ui); --radius:3px; --pad:17px; --gap:15px; --row:34px; --layout:master-detail;
+}
+:root {color-scheme:dark; color:var(--ink); background:var(--bg); font:13px/1.5 var(--font-ui);font-variant-numeric:tabular-nums}

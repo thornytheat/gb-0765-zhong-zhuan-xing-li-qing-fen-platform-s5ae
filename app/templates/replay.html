@@ -1,0 +1,3 @@
+<div class="panel-head"><h2>航段动作序列</h2><span>{{ stages.replay.counts.late }} 条迟到 · {{ stages.replay.counts.conflicts }} 条冲突</span></div>
+<div class="table-scroll"><table><thead><tr><th>行李牌</th><th>航段</th><th>生效 UTC</th><th>动作</th><th>前态</th><th>末态</th><th>原行</th></tr></thead><tbody>
+{% for row in stages.replay.rows %}<tr><td>{{ row.tag }}</td><td>{{ row.leg }}</td><td><time datetime="{{ row.effective }}">{{ row.effective[:19] }}</time></td><td>{{ row.action }}</td><td>{{ row.before }}</td><td>{{ row.after }}</td><td class="num">{{ row.line }}{{ ' · 迟到' if row.late }}</td></tr>{% endfor %}</tbody></table></div>

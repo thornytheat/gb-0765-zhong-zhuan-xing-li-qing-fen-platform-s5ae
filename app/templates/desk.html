@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>中转行李清分台</title>
+{% for file in ['theme','layout','components'] %}<link rel="stylesheet" href="{{ url_for('static', filename=file ~ '.css') }}">{% endfor %}
+<script type="module" src="{{ url_for('static', filename='desk.js') }}"></script></head>
+<body><div class="console">
+<nav aria-label="中转业务"><a class="brand" href="/"><span class="belt-icon" aria-hidden="true"></span>联程席</a><div class="nav-caption">中转值机 · 核验</div>
+{% for id, label in names.items() %}<a class="nav-link" {% if id == key %}aria-current="page"{% endif %} href="{{ url_for('desk.desk', key=id, run=manifest.id if manifest else none, sample=selected) }}"><i></i>{{ label }}</a>{% endfor %}
+</nav>
+<div class="console-body"><header><div><span class="eyebrow">TRANSFER / SORT CONTROL</span><h1>中转行李清分台</h1></div><form id="run-form"><label for="sample">原件</label><select id="sample" name="sample"><option value="dirty" {{ 'selected' if selected == 'dirty' }}>跨日转运 · 脏样例</option><option value="clean" {{ 'selected' if selected == 'clean' }}>计划装载 · 净样例</option></select><button id="archive-button">归档复算</button></form></header>
+<main><div class="batchline"><strong>{{ names[key] }}</strong><span>{{ manifest.id[:12] if manifest else '样例预览' }} · UTC</span></div>
+<div class="kpis" aria-label="转盘信号灯">
+{% for field, label, light in [('manifest','清单','neutral'),('loaded','已装','ok'),('pending','去向待证','warn'),('not_loaded','明确未装','neutral'),('wrong_bags','错装另计','bad')] %}
+<div><span class="signal {{ light }}"></span><span>{{ label }}</span><strong>{{ ledger[field] }}</strong><small>件</small></div>
+{% endfor %}</div>
+
+<div class="station">
+<section class="panel primary">{% include key ~ ('.jinja' if key == 'ledger' else '.html') %}</section>
+<aside class="panel telemetry"><div class="panel-head"><h2>扫描尾</h2><button type="button" id="pause" aria-pressed="false">暂停扫描尾</button></div><ol id="scan-tail" tabindex="0"></ol>
+<template id="tail-source">{% for row in stages.replay.rows|sort(attribute='received') %}<li><time>{{ row.received[11:19] }}</time><span class="{{ 'warn' if row.late else 'neutral' }}">{{ '迟到' if row.late else '记录' }}</span><b>{{ row.tag }}</b><span>{{ row.leg }} · {{ row.action }}</span></li>{% endfor %}</template></aside>
+
+</div></main>
+<footer><span>席位 / TRANSFER</span><span id="feedback" role="status">{{ manifest.version if manifest else 'LEG-LUGGAGE / 1' }}</span><time>{{ manifest.generated_at[:19] if manifest else '离线预览' }}</time></footer>
+</div></div></body></html>

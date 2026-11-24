@@ -1,0 +1,4 @@
+.env
+var
+.pytest_cache
+**/__pycache__

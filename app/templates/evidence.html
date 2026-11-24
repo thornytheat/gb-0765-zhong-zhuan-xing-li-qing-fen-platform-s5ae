@@ -1,0 +1,2 @@
+<div class="panel-head"><h2>联程证据签发</h2>{% if report %}<a class="action" href="{{ url_for('evidence.export', run=manifest.id) }}">下载证据包</a>{% endif %}</div>
+{% if report %}<div class="table-scroll"><table><thead><tr><th>原件</th><th>SHA-256</th></tr></thead><tbody>{% for row in report.rows %}<tr><td>{{ row.source }}</td><td title="{{ row.sha256 }}">{{ row.sha256[:24] }}</td></tr>{% endfor %}</tbody></table></div><p class="ok empty">证据摘要已核验</p>{% else %}<p class="empty">归档后签发证据。</p>{% endif %}
