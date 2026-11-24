@@ -27,3 +27,25 @@ document.querySelector('#rerun')?.addEventListener('click', event => archive(eve
 document.querySelector('#bag-filter')?.addEventListener('input', event => {
   for (const row of document.querySelectorAll('#bag-list [data-tag]')) row.hidden = !row.dataset.tag.includes(event.target.value.trim());
 });
+async function call(button, url, body) {
+  button.disabled = true;
+  try {
+    const response = await fetch(url, {method: 'POST', headers: {'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : undefined});
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    feedback.textContent = url.endsWith('/revoke') ? '收件权限已撤回 · 旧链接失效' : '证据已签发 · 限本站下载';
+    const params = new URLSearchParams(location.search);
+    params.set('station', button.dataset.station);
+    location.assign(`${location.pathname}?${params}`);
+  } catch (error) {
+    feedback.textContent = error.message || '操作失败，请重试';
+    button.disabled = false;
+  }
+}
+document.querySelectorAll('#station-list .issue, #station-list .revoke').forEach(button => {
+  const run = button.dataset.run, station = encodeURIComponent(button.dataset.station);
+  const url = button.classList.contains('issue')
+    ? `/api/evidence/${run}/stations/${station}`
+    : `/api/evidence/${run}/stations/${station}/revoke`;
+  button.addEventListener('click', () => call(button, url));
+});

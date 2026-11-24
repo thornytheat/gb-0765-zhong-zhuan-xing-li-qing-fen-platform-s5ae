@@ -1,8 +1,10 @@
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, current_app, jsonify, render_template, request
 from .errors import DeskError
 from .input import sample, submission
 from .modules.archive.routes import store
+from .modules.evidence.bundle import certify
 from .modules.evidence.service import index
+from .modules.evidence.station import destinations, summary
 from .pipeline import compute
 from .reasons import REASONS
 
@@ -21,6 +23,25 @@ def snapshot():
         return files, result['stages'], result['manifest'], name
     files = sample(name)
     return files, compute(files), None, name
+
+
+def station_reports(files, stages, manifest):
+    run = manifest['id'] if manifest else None
+    if run is None:
+        return None, None
+    certify(files, dict(stages=stages, manifest=manifest))
+    selected = request.args.get('station')
+    rows = [summary(files, dict(stages=stages, manifest=manifest), destination)
+            for destination in destinations(stages)]
+    chosen = next((row for row in rows if row['destination'] == selected), rows[0] if rows else None)
+    held = {row['destination']: row for row in tickets().list(run)}
+    for row in rows:
+        row['ticket'] = held.get(row['destination'])
+    return rows, chosen
+
+
+def tickets():
+    return current_app.extensions['evidence_tickets']
 
 
 @bp.get('/api/stage/<key>')
@@ -46,7 +67,11 @@ def desk(key):
     if key not in DESK:
         raise DeskError('NO_STAGE', '业务入口不存在', 404)
     files, stages, manifest, name = snapshot()
+    report = index(files, dict(stages=stages, manifest=manifest)) if key == 'evidence' and manifest else None
+    stations, station = (None, None)
+    if key == 'evidence' and manifest:
+        stations, station = station_reports(files, stages, manifest)
     context = dict(stages=stages, ledger=stages['ledger']['counts'], names=DESK, key=key, reasons=REASONS,
                    selected=name, manifest=manifest, archive=store().list() if key == 'archive' else [],
-                   report=index(files, dict(stages=stages, manifest=manifest)) if key == 'evidence' and manifest else None)
+                   report=report, stations=stations, station=station)
     return render_template('desk.html', **context)

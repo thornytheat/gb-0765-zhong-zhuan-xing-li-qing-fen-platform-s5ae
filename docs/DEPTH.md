@@ -13,6 +13,7 @@
 | M5 行李去向对账 | 勾稽计划段与去向件数 | `/` `/api/stage/ledger` | `app/modules/ledger/service.py` | `tests/test_ledger.py` |
 | M6 批次留档复跑 | 保存并复算原件 | `/desk/archive` `POST /api/archive` | `app/modules/archive/service.py` `app/modules/archive/store.py` | `tests/test_archive.py` |
 | M7 联程证据签发 | 验摘要并下载联程证据 | `/desk/evidence` `/api/evidence/<run>/export` | `app/modules/evidence/bundle.py` | `tests/test_evidence.py` |
+| M8 按到达站证据签发 | 逐站签发、撤回收件权限 | `/api/evidence/<run>/stations` `POST /api/evidence/<run>/stations/<destination>` | `app/modules/evidence/station.py` `app/modules/evidence/tickets.py` | `tests/test_evidence.py` |
 
 ## 陷阱登记
 
@@ -27,10 +28,15 @@
 | TRAP-13 | E02 迟到撤下 | 收件顺序末态错误 | 标迟到后按生效回放 | `app/modules/replay/radio.py` | `tests/test_replay.py::test_late_offload_before_reload` |
 | TRAP-14 | E12 同键相反动作 | 后写覆盖 | 全组隔离 | `app/modules/scans/service.py` | `tests/test_scans.py::test_conflicting_id` |
 | TRAP-23 | E04 恰逢跨日换窗 | 同时匹配两段 | 左闭右开 | `app/modules/legs/service.py` | `tests/test_legs.py::test_boundary_handoff` |
+| TRAP-24 | 别站行李随整批外发 | 直接给原件 | 本站行全文、别站行仅留行号与位置承诺 | `app/modules/evidence/station.py` | `tests/test_evidence.py::test_station_does_not_leak_other_station_rows` |
+| TRAP-25 | 航段未定仍外发原行 | 先发后补 | 归定前暂缓该行，件数照常对账 | `app/modules/evidence/station.py` | `tests/test_evidence.py::test_ambiguous_leg_withheld_until_resolved` |
+| TRAP-26 | 撤回后旧链接仍可下载 | 只删索引 | 撤回落在同一签发行，重试复用同一张票 | `app/modules/evidence/tickets.py` | `tests/test_evidence.py::test_revocation_blocks_old_link_and_retry` |
 
 ## 对账规则
 
 脏样例清单 12 = 3 已装 + 8 待证 + 1 明确未装，错装 2 件另列。扫描原件记录 24 = 17 采信 + 4 隔离 + 1 重报 + 1 重复表头 + 1 空行。
+
+按站签发时，各站计划件数之和仍为 12（厦门 2 + 宁波 5 + 福州 2 + 青岛 3），且每站 `counts` 与对账中该站计划件逐字段一致（`manifest`/`loaded`/`pending`/`not_loaded`）。别站行以行号与位置承诺留痕，航段未定的行暂缓外发，两者都不改变对账件数。
 
 ## 已知范围
 

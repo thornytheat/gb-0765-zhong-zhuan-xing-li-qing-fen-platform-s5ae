@@ -6,6 +6,7 @@ from .errors import DeskError
 from .modules.archive.routes import bp as archive
 from .modules.archive.store import Archive
 from .modules.evidence.routes import bp as evidence
+from .modules.evidence.tickets import Tickets
 from .web import bp as desk
 
 
@@ -14,7 +15,9 @@ def create_app(path=None):
     app.select_jinja_autoescape = lambda name: name is None or name.endswith(('.html', '.jinja'))
     app.url_map.redirect_defaults = False
     app.config['MAX_CONTENT_LENGTH'] = 2_000_000
-    app.extensions['transfer_archive'] = Archive(path or os.getenv('LUGGAGE_DB', 'var/transfer.sqlite3'))
+    archive_store = Archive(path or os.getenv('LUGGAGE_DB', 'var/transfer.sqlite3'))
+    app.extensions['transfer_archive'] = archive_store
+    app.extensions['evidence_tickets'] = Tickets(archive_store.path)
     for routes in (archive, evidence, desk):
         app.register_blueprint(routes)
 
